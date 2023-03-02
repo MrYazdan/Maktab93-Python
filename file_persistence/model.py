@@ -7,12 +7,12 @@ class Event:
         date : "2-3-2023"
     """
 
-    def __new__(cls, *args, **kwargs):
-        for o in cls.__objects:
-            if o.name == args[0]:
-                return False
-
-        return super().__new__(cls)
+    # def __new__(cls, *args, **kwargs):
+    #     # for o in cls.__objects:
+    #     #     if o.name == args[0]:
+    #     #         return False
+    #
+    #     return super().__new__(cls)
 
     @classmethod
     def events(cls):
@@ -84,21 +84,3 @@ class Event:
 
     def __eq__(self, _event):
         return self.id == _event.id
-
-
-# load from file:
-with open("events.data", "a+") as f:
-    f.seek(0)
-    for line in f.readlines():
-        Event.create_event_from_file_format(line)
-
-# print(*Event.events(), sep="\n")
-tehran = Event("Tehran", 40)
-isfahan = Event("Isfahan", 40)
-mashhad = Event("Mashhad", 40)
-shiraz = Event("Shiraz", 40)
-
-# save in file:
-with open("events.data", "w") as f:
-    for event in Event.events():
-        print(event.file_format(), file=f)
