@@ -1,38 +1,5 @@
-from os import system as terminal, name as os_name
-
-
-def say_hello():
-    print("Hi, what's up honey :)")
-
-
-def say_goodbye():
-    print("Hi, what's up honey :)")
-
-
-def clear() -> None:
-    terminal("cls" if os_name.lower() == "nt" else "clear")
-
-
-def banner(name: str) -> None:
-    clear()
-    print("=" * 52, name.title().center(52), "=" * 52, sep="\n")
-
-
-class StateManager:
-    __routes = []
-
-    @classmethod
-    def get_current_route_name(cls):
-        return " > ".join(cls.__routes)
-
-    @classmethod
-    def add_route_name(cls, name):
-        if not len(cls.__routes) or cls.__routes[-1] != name:
-            cls.__routes.append(name)
-
-    @classmethod
-    def delete_last_route_name(cls) -> None:
-        cls.__routes.pop()
+from core.state import StateManager
+from core.utils import banner
 
 
 class CallBack:
@@ -58,13 +25,14 @@ class Route:
         children
     """
 
-    def __init__(self, name, description=None, callback=None, children=None):
+    def __init__(self, name, description=None, callback=None, children=None, condition=lambda: True):
         self.parent = None
         self.children = None
 
         self.name = name
         self.description = description
         self.callback = callback
+        self.condition = condition
 
         # self._set_parent(children) if children else None
         children and self._set_parent(children)
@@ -79,13 +47,13 @@ class Route:
             banner(StateManager.get_current_route_name())
             print(self.description or "", end="\n\n")
 
-            if self.children:
-                for child in self.children:
-                    print(f"\t{self.children.index(child) + 1}. {child.name}")
+            if children := [child for child in self.children if child.condition()]:
+                for child in children:
+                    print(f"\t{children.index(child) + 1}. {child.name}")
                 print(f"\n\t0. " + ("Exit" if not self.parent else f"Back to {self.parent.name}"))
 
                 index = int(input("\n> ")) - 1
-                route = self.children[index] if index != -1 else self.parent
+                route = children[index] if index != -1 else self.parent
 
                 if not route:
                     banner("Exit")
@@ -116,7 +84,7 @@ class Route:
         else:
             try:
                 banner(route.name)
-                route.callback and route.callback()
+                route.callback and route.callback(route)
             except Exception as e:
                 banner("Error")
             input("\nPress Enter to continue ... ")
@@ -129,35 +97,26 @@ class Router:
         routes
     """
 
-    def __init__(self, route: Route):
+    def __init__(self, route):
         self.route = route
         StateManager.add_route_name(route.name)
 
     def __call__(self, *args, **kwargs):
         self.route()
 
-
-router = Router(
-    Route("Main", description="Maktab93 Simple Menu Tools", children=[
-        Route("Say hello First", callback=say_hello),
-        Route("Say hello 2", callback=say_hello),
-        Route("Say hello 3", callback=say_hello),
-        Route("Goodbye menu", children=[
-            Route("Say bye 1", callback=say_goodbye),
-            Route("Say bye 2", callback=say_goodbye),
-            Route("Say bye 3", callback=say_goodbye),
-            Route("Hello menu", children=[
-                Route("Say bye 1", callback=say_goodbye),
-                Route("Say bye 2", callback=say_goodbye),
-                Route("Say bye 3", callback=say_goodbye),
-            ]),
-        ]),
-        Route("Say Goodbye", children=[
-            Route("Say hello 1", callback=say_hello),
-            Route("Say hello 2", callback=say_hello),
-            Route("Say hello 3", callback=say_hello),
-        ])
-    ])
-)
-
-router()
+# from time import sleep
+#
+#
+# class TimeLoop:
+#     def __init__(self, timeout):
+#         self.timeout = timeout
+#         self.count = 0
+#
+#     def __call__(self, *args, **kwargs):
+#         self.count += 1
+#         print("Count of TimeLoop:", self.count)
+#         sleep(self.timeout)
+#         self()
+#
+#
+# TimeLoop(1)()
