@@ -1,9 +1,13 @@
+from core.handlers import FileHandler
+
+
 class User:
-    __users = []
+    __db = FileHandler("storage/users.pickle")
+    __users = __db.get_list_data
 
     @classmethod
     def authentication(cls, username, password):
-        for user in cls.__users:
+        for user in cls.__users():
             if user.username == username and user.password == password:
                 return user
 
@@ -14,7 +18,7 @@ class User:
         self.password = password
         self.username = username
 
-        self.__class__.__users.append(self)
+        self.__class__.__db.append(self)
 
     @property
     def password(self):
@@ -37,6 +41,6 @@ class User:
         #         raise ...
         # Generator =-> (for u in users if new_username == u.username)
 
-        assert not any(user for user in self.__class__.__users if user.username == new_username), \
+        assert not any(user for user in self.__class__.__users() if user.username == new_username), \
             "Username exists !"
         self.__username = new_username

@@ -3,6 +3,7 @@ from getpass import getpass
 from admin.models import User
 from core.state import StateManager
 from core.utils import banner, try_again
+from event.models import Event
 
 
 def login(route):
@@ -55,3 +56,25 @@ def register(route):
 def logout(route):
     StateManager.logout()
     print("\n- Logout successful ✅")
+
+
+def register_event(route):
+    try:
+        name = input("Please enter event name: ").title()
+        assert name, "Name should not be empty !"
+
+        capacity = input("Please enter event capacity: ")
+        assert capacity, "Capacity should not be empty !"
+        assert capacity.isnumeric(), "Capacity should be numeric !"
+
+        date = input("Please enter event Date: ")
+
+        Event(name, capacity, date or "2023-03-03")
+
+        print("\n- Register event successful ✅")
+    except (Exception, KeyboardInterrupt, AssertionError) as e:
+        banner("Error")
+        print(e)
+
+        # try | again !
+        try_again(route, register)

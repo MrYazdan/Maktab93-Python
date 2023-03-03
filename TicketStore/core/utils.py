@@ -7,7 +7,7 @@ def clear():
 
 def banner(name):
     clear()
-    print("=" * 52, name.title().center(52), "=" * 52, sep="\n")
+    print("=" * 30, name.title().center(30), "=" * 30, sep="\n")
 
 
 def try_again(route, function):
